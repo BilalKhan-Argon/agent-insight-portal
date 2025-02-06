@@ -16,6 +16,14 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useState } from "react";
 
 const mockData = {
   performance: "85%",
@@ -23,7 +31,7 @@ const mockData = {
   missedCalls: 45,
   conversionRate: "32%",
   callVolume: 1234,
-  availableHours: "95%",
+  availableHours: 72.5,
   chartData: [
     { name: "Mon", calls: 400 },
     { name: "Tue", calls: 300 },
@@ -36,13 +44,28 @@ const mockData = {
 };
 
 const Dashboard = () => {
+  const [dateRange, setDateRange] = useState("all");
+
   return (
     <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <p className="text-muted-foreground">
-          Your call center performance at a glance
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+          <p className="text-muted-foreground">
+            Your call center performance at a glance
+          </p>
+        </div>
+        <Select value={dateRange} onValueChange={setDateRange}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Date Range" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Time</SelectItem>
+            <SelectItem value="today">Today</SelectItem>
+            <SelectItem value="week">This Week</SelectItem>
+            <SelectItem value="month">This Month</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -78,7 +101,7 @@ const Dashboard = () => {
         />
         <MetricCard
           title="Available Hours"
-          value={mockData.availableHours}
+          value={`${mockData.availableHours.toFixed(1)} hrs`}
           icon={<Clock className="h-4 w-4 text-primary" />}
           description="Team availability"
         />

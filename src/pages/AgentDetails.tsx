@@ -12,10 +12,19 @@ import {
 } from "recharts";
 import { MetricCard } from "@/components/MetricCard";
 import { Phone, Users, PhoneOff, BarChart3, Clock } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useState } from "react";
 
 const mockAgentData = {
   "John Smith": {
     performance: "92%",
+    availableHours: 85.5,
     data: [
       { month: "Jan", calls: 120, conversions: 45 },
       { month: "Feb", calls: 150, conversions: 60 },
@@ -24,6 +33,7 @@ const mockAgentData = {
   },
   "Sarah Johnson": {
     performance: "88%",
+    availableHours: 75.0,
     data: [
       { month: "Jan", calls: 100, conversions: 35 },
       { month: "Feb", calls: 130, conversions: 45 },
@@ -32,6 +42,7 @@ const mockAgentData = {
   },
   "Michael Brown": {
     performance: "85%",
+    availableHours: 55.5,
     data: [
       { month: "Jan", calls: 90, conversions: 27 },
       { month: "Feb", calls: 120, conversions: 36 },
@@ -43,6 +54,7 @@ const mockAgentData = {
 const AgentDetails = () => {
   const navigate = useNavigate();
   const { agentName } = useParams();
+  const [dateRange, setDateRange] = useState("all");
   const agent = agentName ? mockAgentData[agentName as keyof typeof mockAgentData] : null;
 
   if (!agent) {
@@ -51,18 +63,31 @@ const AgentDetails = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate(-1)}
-          className="h-8 w-8"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <h2 className="text-3xl font-bold tracking-tight">
-          {agentName} - {agent.performance} Performance
-        </h2>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="h-8 w-8"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {agentName} - {agent.performance} Performance
+          </h2>
+        </div>
+        <Select value={dateRange} onValueChange={setDateRange}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Date Range" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Time</SelectItem>
+            <SelectItem value="today">Today</SelectItem>
+            <SelectItem value="week">This Week</SelectItem>
+            <SelectItem value="month">This Month</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -83,7 +108,7 @@ const AgentDetails = () => {
         />
         <MetricCard
           title="Available Hours"
-          value="98%"
+          value={`${agent.availableHours.toFixed(1)} hrs`}
           icon={<Clock className="h-4 w-4 text-muted-foreground" />}
         />
       </div>

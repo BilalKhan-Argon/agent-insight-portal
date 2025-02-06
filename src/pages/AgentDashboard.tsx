@@ -26,7 +26,7 @@ const mockAgents = [
     missedCalls: 12,
     conversionRate: "38%",
     callVolume: 384,
-    availableHours: "98%",
+    availableHours: 85.5,
   },
   {
     id: 2,
@@ -36,7 +36,7 @@ const mockAgents = [
     missedCalls: 15,
     conversionRate: "35%",
     callVolume: 356,
-    availableHours: "95%",
+    availableHours: 75.0,
   },
   {
     id: 3,
@@ -46,7 +46,7 @@ const mockAgents = [
     missedCalls: 18,
     conversionRate: "30%",
     callVolume: 312,
-    availableHours: "92%",
+    availableHours: 55.5,
   },
 ];
 
@@ -55,6 +55,7 @@ const AgentDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [performanceFilter, setPerformanceFilter] = useState("all");
   const [dateRange, setDateRange] = useState("all");
+  const [hoursFilter, setHoursFilter] = useState("all");
 
   const filteredAgents = mockAgents.filter((agent) => {
     const matchesSearch = agent.name
@@ -68,7 +69,13 @@ const AgentDashboard = () => {
       (performanceFilter === "80to90" && performanceNum >= 80 && performanceNum < 90) ||
       (performanceFilter === "below80" && performanceNum < 80);
 
-    return matchesSearch && matchesPerformance;
+    const matchesHours = 
+      hoursFilter === "all" ||
+      (hoursFilter === "above80" && agent.availableHours > 80) ||
+      (hoursFilter === "60to80" && agent.availableHours >= 60 && agent.availableHours <= 80) ||
+      (hoursFilter === "below60" && agent.availableHours < 60);
+
+    return matchesSearch && matchesPerformance && matchesHours;
   });
 
   return (
@@ -87,7 +94,7 @@ const AgentDashboard = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
         />
-        <div className="flex gap-4">
+        <div className="flex flex-col gap-4 md:flex-row">
           <Select value={performanceFilter} onValueChange={setPerformanceFilter}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Performance Filter" />
@@ -97,6 +104,17 @@ const AgentDashboard = () => {
               <SelectItem value="above90">Above 90%</SelectItem>
               <SelectItem value="80to90">80% to 90%</SelectItem>
               <SelectItem value="below80">Below 80%</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={hoursFilter} onValueChange={setHoursFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Hours Filter" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Hours</SelectItem>
+              <SelectItem value="above80">Above 80 Hours</SelectItem>
+              <SelectItem value="60to80">60-80 Hours</SelectItem>
+              <SelectItem value="below60">Below 60 Hours</SelectItem>
             </SelectContent>
           </Select>
           <Select value={dateRange} onValueChange={setDateRange}>
@@ -139,7 +157,7 @@ const AgentDashboard = () => {
                 <TableCell>{agent.missedCalls}</TableCell>
                 <TableCell>{agent.conversionRate}</TableCell>
                 <TableCell>{agent.callVolume}</TableCell>
-                <TableCell>{agent.availableHours}</TableCell>
+                <TableCell>{agent.availableHours.toFixed(1)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
