@@ -53,7 +53,7 @@ const mockAgents = [
 const AgentDashboard = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [performanceFilter, setPerformanceFilter] = useState("");
+  const [performanceFilter, setPerformanceFilter] = useState("all");
   const [dateRange, setDateRange] = useState("all");
 
   const filteredAgents = mockAgents.filter((agent) => {
@@ -63,7 +63,7 @@ const AgentDashboard = () => {
     
     const performanceNum = parseInt(agent.performance);
     const matchesPerformance = 
-      performanceFilter === "" ||
+      performanceFilter === "all" ||
       (performanceFilter === "above90" && performanceNum >= 90) ||
       (performanceFilter === "80to90" && performanceNum >= 80 && performanceNum < 90) ||
       (performanceFilter === "below80" && performanceNum < 80);
@@ -93,7 +93,7 @@ const AgentDashboard = () => {
               <SelectValue placeholder="Performance Filter" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Performance</SelectItem>
+              <SelectItem value="all">All Performance</SelectItem>
               <SelectItem value="above90">Above 90%</SelectItem>
               <SelectItem value="80to90">80% to 90%</SelectItem>
               <SelectItem value="below80">Below 80%</SelectItem>
