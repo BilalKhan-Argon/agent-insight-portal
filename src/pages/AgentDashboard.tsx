@@ -7,7 +7,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const mockAgents = [
   {
@@ -43,28 +51,66 @@ const mockAgents = [
 ];
 
 const AgentDashboard = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [performanceFilter, setPerformanceFilter] = useState("");
+  const [dateRange, setDateRange] = useState("all");
 
-  const filteredAgents = mockAgents.filter((agent) =>
-    agent.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredAgents = mockAgents.filter((agent) => {
+    const matchesSearch = agent.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    
+    const performanceNum = parseInt(agent.performance);
+    const matchesPerformance = 
+      performanceFilter === "" ||
+      (performanceFilter === "above90" && performanceNum >= 90) ||
+      (performanceFilter === "80to90" && performanceNum >= 80 && performanceNum < 90) ||
+      (performanceFilter === "below80" && performanceNum < 80);
+
+    return matchesSearch && matchesPerformance;
+  });
 
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Agent Dashboard</h2>
+        <h2 className="text-3xl font-bold tracking-tight">MacNulty Call Center</h2>
         <p className="text-muted-foreground">
           Monitor individual agent performance
         </p>
       </div>
 
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <Input
           placeholder="Search agents..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
         />
+        <div className="flex gap-4">
+          <Select value={performanceFilter} onValueChange={setPerformanceFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Performance Filter" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Performance</SelectItem>
+              <SelectItem value="above90">Above 90%</SelectItem>
+              <SelectItem value="80to90">80% to 90%</SelectItem>
+              <SelectItem value="below80">Below 80%</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={dateRange} onValueChange={setDateRange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Date Range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Time</SelectItem>
+              <SelectItem value="today">Today</SelectItem>
+              <SelectItem value="week">This Week</SelectItem>
+              <SelectItem value="month">This Month</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="border rounded-lg">
@@ -82,7 +128,11 @@ const AgentDashboard = () => {
           </TableHeader>
           <TableBody>
             {filteredAgents.map((agent) => (
-              <TableRow key={agent.id}>
+              <TableRow 
+                key={agent.id}
+                className="cursor-pointer hover:bg-muted/50"
+                onClick={() => navigate(`/agents/${agent.name}`)}
+              >
                 <TableCell className="font-medium">{agent.name}</TableCell>
                 <TableCell>{agent.performance}</TableCell>
                 <TableCell>{agent.newClients}</TableCell>
