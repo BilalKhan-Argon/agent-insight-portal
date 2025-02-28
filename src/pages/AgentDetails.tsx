@@ -42,7 +42,7 @@ const AgentDetails = () => {
   const [loading, setLoading] = useState(true);
 
 
-  const API_URL = "http://10.3.1.156:8000/conversion-rate";
+  const API_URL = "http://31.220.107.112:8888/conversion-rate";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -156,7 +156,7 @@ const AgentDetails = () => {
         />
         <MetricCard
           title="Conversion Rate"
-          value={`${agent.conversionRate.toFixed(1)} hrs`}
+          value={`${agent.conversionRate.toFixed(1)} %`}
           icon={<Clock className="h-4 w-4 text-muted-foreground" />}
         />
       </div>
@@ -175,7 +175,9 @@ const AgentDetails = () => {
               </TableRow>
             </TableHeader>
             {loading ? (
-              <p>Loading...</p>
+              <div className="flex justify-center items-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500"></div>
+            </div>
             ) : (
               <TableBody>
                 {cumulativeData[agentName] && (
@@ -215,7 +217,9 @@ const AgentDetails = () => {
             </TableRow>
           </TableHeader>
           {loading ? (
-            <p>Loading...</p>
+            <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500"></div>
+          </div>
           ) : (
             <TableBody>
               {currentMonthData.map((item) => (

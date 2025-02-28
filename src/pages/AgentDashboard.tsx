@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const API_URL = "http://10.3.1.156:8000/conversion-rate";
+const API_URL = "http://31.220.107.112:8888/conversion-rate";
 
 const AgentDashboard = () => {
   const navigate = useNavigate();
@@ -46,16 +46,43 @@ const AgentDashboard = () => {
 
     fetchData();
   }, []);
-
-  const transformData = (apiData) => {
-    const agentMap = {};
+  interface Agent {
+    id: string;
+    name: string;
+    performance: string;
+    newClients: number;
+    missedCalls: number;
+    conversionRate: number;
+    callVolume: number;
+    availableHours: string;
+    entries: number;
+  }
+  interface AgentData {
+    total_bookings: number;
+    conversion_rate: number;
+    total_calls: number;
+  }
+  
+  interface APIResponseEntry {
+    date: string;
+    all_calls: number;
+    all_missed_calls: number;
+    all_missed_calls_percentage: number;
+    [agentName: string]: AgentData | string | number;
+  }
+  
+  
+  const transformData = (apiData: APIResponseEntry[]) => {
+    const agentMap: Record<string, Agent> = {};
     let totalMissedCalls = 0;
-    
+  
     apiData.forEach((entry) => {
       totalMissedCalls += entry.all_missed_calls;
-      
+  
       Object.keys(entry).forEach((key) => {
         if (!["date", "all_calls", "all_missed_calls", "all_missed_calls_percentage"].includes(key)) {
+          const agentData = entry[key] as AgentData; // Type assertion ✅
+  
           if (!agentMap[key]) {
             agentMap[key] = {
               id: key,
@@ -70,21 +97,30 @@ const AgentDashboard = () => {
             };
           }
   
-          agentMap[key].newClients += entry[key].total_bookings;
+          agentMap[key].newClients += agentData.total_bookings || 0;
           agentMap[key].missedCalls = totalMissedCalls;
-          agentMap[key].conversionRate += entry[key].conversion_rate;
-          agentMap[key].callVolume += entry[key].total_calls;
+          agentMap[key].conversionRate += agentData.conversion_rate || 0;
+          agentMap[key].callVolume += agentData.total_calls || 0;
           agentMap[key].entries += 1;
-          
         }
       });
     });
   
+    // ✅ Compute the average conversion rate
+    Object.values(agentMap).forEach((agent) => {
+      if (agent.entries > 0) {
+        agent.conversionRate = agent.conversionRate / agent.entries;
+      }
+    });
+  
     return {
-      agentMap: Object.values(agentMap), // Convert agentMap to an array
+      agentMap: Object.values(agentMap),
       missedCalls: totalMissedCalls,
     };
   };
+  
+  
+  
   
 
   // Filtering logic
@@ -125,7 +161,9 @@ const AgentDashboard = () => {
             </TableRow>
           </TableHeader>
           {loading ? (
-            <p>Loading...</p>
+            <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500"></div>
+          </div>
           ) : (
             <TableBody>
               {filteredAgents.map((agent) => (
@@ -139,7 +177,7 @@ const AgentDashboard = () => {
                   <TableCell className="font-medium">{agent.name}</TableCell>
                   <TableCell>{agent.newClients}</TableCell>
                   <TableCell>{totalMissedCalls}</TableCell>
-                  <TableCell>{agent.conversionRate.toFixed(2)}</TableCell>
+                  <TableCell>{`${agent.conversionRate.toFixed(1)} %`}</TableCell>
                   <TableCell>{agent.callVolume}</TableCell>
                 </TableRow>
               ))}

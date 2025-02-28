@@ -25,7 +25,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const API_BASE_URL = "http://10.3.1.156:8000";
+const API_BASE_URL = "http://31.220.107.112:8888";
 
 const getCurrentMonth = () => {
   return new Date().toLocaleString("en-US", { month: "long" }); // Example: "February"
@@ -78,7 +78,9 @@ const Dashboard = () => {
       </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <div className="flex justify-center items-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500"></div>
+      </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <MetricCard
