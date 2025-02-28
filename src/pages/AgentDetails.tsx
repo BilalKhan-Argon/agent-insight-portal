@@ -28,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import axios from "axios"; // Assuming you're using Axios for API calls
+import axios from "axios"; 
 
 const AgentDetails = () => {
   const navigate = useNavigate();
@@ -40,7 +40,9 @@ const AgentDetails = () => {
   const [currentMonthData, setCurrentMonthData] = useState([]);
   const [cumulativeData, setCumulativeData] = useState({});
   const [loading, setLoading] = useState(true);
-
+  const [selectedMonth, setSelectedMonth] = useState(
+    new Date().getMonth() + 1
+  );
 
   const API_URL = "http://31.220.107.112:8888/conversion-rate";
 
@@ -48,7 +50,8 @@ const AgentDetails = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(API_URL);
+        // const response = await axios.get(API_URL);
+        const response = await axios.get(`${API_URL}?month=${selectedMonth}`);
         const fullData = response.data;
         setData(fullData);
         processCurrentMonthData(fullData);
@@ -59,17 +62,18 @@ const AgentDetails = () => {
     };
 
     fetchData();
-  }, []);
+  }, [selectedMonth]);
   
 
   const processCurrentMonthData = (fullData) => {
-    const currentMonth = new Date().getMonth() + 1;
+    // const currentMonth = new Date().getMonth() + 1;
     const currentYear = new Date().getFullYear();
 
     // Filter data for the current month
     const filteredData = fullData.filter((item) => {
       const [month, day, year] = item.date.split("/").map(Number);
-      return month === currentMonth && year === currentYear;
+      // return month === currentMonth && year === currentYear;
+      return month === selectedMonth && year === currentYear;
     });
 
     // Extract data only for the selected agent
@@ -125,7 +129,22 @@ const AgentDetails = () => {
             {agentName} - Performance Details
           </h2>
         </div>
-        <Select value={dateRange} onValueChange={setDateRange}>
+        <Select
+          value={selectedMonth.toString()}
+          onValueChange={(value) => setSelectedMonth(Number(value))}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select Month" />
+          </SelectTrigger>
+          <SelectContent>
+            {Array.from({ length: 12 }, (_, i) => (
+              <SelectItem key={i + 1} value={(i + 1).toString()}>
+                {new Date(2024, i).toLocaleString("default", { month: "long" })}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {/* <Select value={dateRange} onValueChange={setDateRange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Date Range" />
           </SelectTrigger>
@@ -135,7 +154,7 @@ const AgentDetails = () => {
             <SelectItem value="today">Today</SelectItem>
             <SelectItem value="all">All Time</SelectItem>
           </SelectContent>
-        </Select>
+        </Select> */}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -145,14 +164,14 @@ const AgentDetails = () => {
           icon={<Phone className="h-4 w-4 text-muted-foreground" />}
         />
         <MetricCard
-          title="New Clients"
-          value={agent.newClients}
-          icon={<Users className="h-4 w-4 text-muted-foreground" />}
-        />
-        <MetricCard
           title="Missed Calls"
           value={agent.missedCalls}
           icon={<PhoneOff className="h-4 w-4 text-muted-foreground" />}
+        />
+        <MetricCard
+          title="New Clients"
+          value={agent.newClients}
+          icon={<Users className="h-4 w-4 text-muted-foreground" />}
         />
         <MetricCard
           title="Conversion Rate"
@@ -170,7 +189,7 @@ const AgentDetails = () => {
                 <TableHead>Agent</TableHead>
                 <TableHead>Total Calls</TableHead>
                 <TableHead>Missed Calls</TableHead>
-                <TableHead>Total Bookings</TableHead>
+                <TableHead>New Clients</TableHead>
                 <TableHead>Conversion Rate (%)</TableHead>
               </TableRow>
             </TableHeader>
@@ -212,7 +231,7 @@ const AgentDetails = () => {
               <TableHead>Agent</TableHead>
               <TableHead>Total Calls</TableHead>
               <TableHead>Missed Calls</TableHead>
-              <TableHead>Total Bookings</TableHead>
+              <TableHead>New Clients</TableHead>
               <TableHead>Conversion Rate (%)</TableHead>
             </TableRow>
           </TableHeader>
@@ -240,34 +259,6 @@ const AgentDetails = () => {
           )}
         </Table>
       </div>
-
-      {/* <div className="rounded-lg border bg-card p-6">
-        <h3 className="text-lg font-semibold mb-4">Performance Trends</h3>
-        <LineChart
-          width={800}
-          height={400}
-          data={agent.performanceData}
-          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="month" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Line
-            type="monotone"
-            dataKey="calls"
-            stroke="#8884d8"
-            name="Total Calls"
-          />
-          <Line
-            type="monotone"
-            dataKey="conversions"
-            stroke="#82ca9d"
-            name="Conversions"
-          />
-        </LineChart>
-      </div> */}
     </div>
   );
 };

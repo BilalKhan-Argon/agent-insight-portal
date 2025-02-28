@@ -27,33 +27,39 @@ import {
 
 const API_BASE_URL = "http://31.220.107.112:8888";
 
-const getCurrentMonth = () => {
-  return new Date().toLocaleString("en-US", { month: "long" }); // Example: "February"
+// Function to get the full month name
+const getMonthName = (monthIndex) => {
+  return new Date(2025, monthIndex, 1).toLocaleString("en-US", { month: "long" });
 };
 
+// Generate months list
+const months = Array.from({ length: 12 }, (_, i) => getMonthName(i));
+
 const Dashboard = () => {
-  // const [dateRange, setDateRange] = useState("all");
+  const [selectedMonth, setSelectedMonth] = useState(getMonthName(new Date().getMonth()));
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const month = getCurrentMonth();
-      try {
-        const response = await fetch(`${API_BASE_URL}/${month}`);
-        const result = await response.json();
-        if (result.data && result.data.length > 0) {
-          setData(result.data[0]); // Assuming only one month's data is returned
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
+  const fetchData = async (month) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/${month}`);
+      const result = await response.json();
+      if (result.data && result.data.length > 0) {
+        setData(result.data[0]); // Assuming only one month's data is returned
+      } else {
+        setData(null);
       }
-      setLoading(false);
-    };
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setData(null);
+    }
+    setLoading(false);
+  };
 
-    fetchData();
-  }, []);
+  useEffect(() => {
+    fetchData(selectedMonth);
+  }, [selectedMonth]);
 
   return (
     <div className="space-y-8">
@@ -64,30 +70,37 @@ const Dashboard = () => {
             Your call center performance at a glance
           </p>
         </div>
-        {/* <Select value={dateRange} onValueChange={setDateRange}>
+        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Date Range" />
+            <SelectValue placeholder="Select Month" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Time</SelectItem>
-            <SelectItem value="today">Today</SelectItem>
-            <SelectItem value="week">This Week</SelectItem>
-            <SelectItem value="month">This Month</SelectItem>
+            {months.map((month) => (
+              <SelectItem key={month} value={month}>
+                {month}
+              </SelectItem>
+            ))}
           </SelectContent>
-        </Select> */}
+        </Select>
       </div>
 
       {loading ? (
         <div className="flex justify-center items-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500"></div>
-      </div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500"></div>
+        </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <MetricCard
-            title="Total No.Of Patients"
-            value={data ? data["NPTs (Total)"] ?? "N/A" : "N/A"}
-            icon={<BarChart3 className="h-4 w-4 text-primary" />}
-            description="Overall efficiency score"
+            title="Call Volume"
+            value={data ? data["Total New Client Inbound Calls"] ?? "N/A" : "N/A"}
+            icon={<Phone className="h-4 w-4 text-primary" />}
+            description="Total calls this month"
+          />
+          <MetricCard
+            title="Missed Calls"
+            value={data ? data["Missed Calls on New Client Line"] ?? "N/A" : "N/A"}
+            icon={<PhoneOff className="h-4 w-4 text-destructive" />}
+            description="Calls Missed in this month"
           />
           <MetricCard
             title="New Clients"
@@ -96,10 +109,10 @@ const Dashboard = () => {
             description="This month"
           />
           <MetricCard
-            title="Missed Calls"
-            value={data ? data["Missed Calls on New Client Line"] ?? "N/A" : "N/A"}
-            icon={<PhoneOff className="h-4 w-4 text-destructive" />}
-            description="Last 24 hours"
+            title="Total Patients"
+            value={data ? data["NPTs (Total)"] ?? "N/A" : "N/A"}
+            icon={<BarChart3 className="h-4 w-4 text-primary" />}
+            description="Total Patients in this month"
           />
           <MetricCard
             title="Conversion Rate"
@@ -108,16 +121,10 @@ const Dashboard = () => {
             description="Average per FDO"
           />
           <MetricCard
-            title="Call Volume"
-            value={data ? data["Total New Client Inbound Calls"] ?? "N/A" : "N/A"}
-            icon={<Phone className="h-4 w-4 text-primary" />}
-            description="Total calls this month"
-          />
-          <MetricCard
             title="Available Hours"
             value="N/A"
             icon={<Clock className="h-4 w-4 text-primary" />}
-            description="Team availability"
+            description="Team availability Hour Count for month"
           />
         </div>
       )}

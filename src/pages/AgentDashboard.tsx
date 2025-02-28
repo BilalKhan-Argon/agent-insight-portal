@@ -62,7 +62,7 @@ const AgentDashboard = () => {
     conversion_rate: number;
     total_calls: number;
   }
-  
+
   interface APIResponseEntry {
     date: string;
     all_calls: number;
@@ -70,19 +70,25 @@ const AgentDashboard = () => {
     all_missed_calls_percentage: number;
     [agentName: string]: AgentData | string | number;
   }
-  
-  
+
   const transformData = (apiData: APIResponseEntry[]) => {
     const agentMap: Record<string, Agent> = {};
     let totalMissedCalls = 0;
-  
+
     apiData.forEach((entry) => {
       totalMissedCalls += entry.all_missed_calls;
-  
+
       Object.keys(entry).forEach((key) => {
-        if (!["date", "all_calls", "all_missed_calls", "all_missed_calls_percentage"].includes(key)) {
+        if (
+          ![
+            "date",
+            "all_calls",
+            "all_missed_calls",
+            "all_missed_calls_percentage",
+          ].includes(key)
+        ) {
           const agentData = entry[key] as AgentData; // Type assertion ✅
-  
+
           if (!agentMap[key]) {
             agentMap[key] = {
               id: key,
@@ -96,7 +102,7 @@ const AgentDashboard = () => {
               entries: 0,
             };
           }
-  
+
           agentMap[key].newClients += agentData.total_bookings || 0;
           agentMap[key].missedCalls = totalMissedCalls;
           agentMap[key].conversionRate += agentData.conversion_rate || 0;
@@ -105,35 +111,32 @@ const AgentDashboard = () => {
         }
       });
     });
-  
+
     // ✅ Compute the average conversion rate
     Object.values(agentMap).forEach((agent) => {
       if (agent.entries > 0) {
-        agent.conversionRate = agent.conversionRate / agent.entries;
+        const Cal = agent.newClients / agent.callVolume;
+        agent.conversionRate = Cal * 100;
+        // agent.conversionRate = agent.conversionRate / agent.entries;
       }
     });
-  
+
     return {
       agentMap: Object.values(agentMap),
       missedCalls: totalMissedCalls,
     };
   };
-  
-  
-  
-  
 
   // Filtering logic
-  const filteredAgents = agents.filter((agent) => 
+  const filteredAgents = agents.filter((agent) =>
     agent.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
 
   return (
     <div className="space-y-8">
       <div>
         <h2 className="text-3xl font-bold tracking-tight">
-          MacNulty Call Center
+          McNulty Counselling & Wellness (FDO-Dashboard)
         </h2>
         <p className="text-muted-foreground">
           Monitor individual agent performance
@@ -156,14 +159,14 @@ const AgentDashboard = () => {
               <TableHead>Name</TableHead>
               <TableHead>New Clients</TableHead>
               <TableHead>Missed Calls</TableHead>
-              <TableHead>Conversion Rate</TableHead>
               <TableHead>Call Volume</TableHead>
+              <TableHead>Conversion Rate</TableHead>
             </TableRow>
           </TableHeader>
           {loading ? (
             <div className="flex justify-center items-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500"></div>
-          </div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500"></div>
+            </div>
           ) : (
             <TableBody>
               {filteredAgents.map((agent) => (
@@ -177,8 +180,10 @@ const AgentDashboard = () => {
                   <TableCell className="font-medium">{agent.name}</TableCell>
                   <TableCell>{agent.newClients}</TableCell>
                   <TableCell>{totalMissedCalls}</TableCell>
-                  <TableCell>{`${agent.conversionRate.toFixed(1)} %`}</TableCell>
                   <TableCell>{agent.callVolume}</TableCell>
+                  <TableCell>{`${agent.conversionRate.toFixed(
+                    1
+                  )} %`}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
