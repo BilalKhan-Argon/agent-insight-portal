@@ -19,7 +19,7 @@ const menuItems = [
     path: "/",
   },
   {
-    title: "Agents",
+    title: "Insigths",
     icon: Users,
     path: "/agents",
   },
