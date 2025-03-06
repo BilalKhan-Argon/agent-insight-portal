@@ -103,7 +103,7 @@ const Dashboard = () => {
             description="Calls Missed in this month"
           />
           <MetricCard
-            title="New Clients"
+            title="Unique Clients"
             value={data ? data["Total New Client Unique Inbound Calls"] ?? "N/A" : "N/A"}
             icon={<UserPlus className="h-4 w-4 text-primary" />}
             description="This month"
@@ -121,10 +121,10 @@ const Dashboard = () => {
             description="Average per FDO"
           />
           <MetricCard
-            title="Available Hours"
-            value="N/A"
+            title="Total Booking from calls"
+            value={data ? data["Bookings from Calls"] ?? "N/A" : "N/A"}
             icon={<Clock className="h-4 w-4 text-primary" />}
-            description="Team availability Hour Count for month"
+            description="Total Booking from calls in this month"
           />
         </div>
       )}
